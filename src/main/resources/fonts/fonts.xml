@@ -1,11 +1,38 @@
 <?xml version="1.0" encoding="UTF-8"?>
+
 <fontFamilies>
+
+    <!-- ==========================================
+         MyPC 商城中文字型
+         ========================================== -->
     <fontFamily name="MyChineseFont">
-        <normal>fonts/NotoSansTC-Regular.ttf</normal>
-        <bold>fonts/NotoSansTC-Regular.ttf</bold>
-        <italic>fonts/NotoSansTC-Regular.ttf</italic>
-        <boldItalic>fonts/NotoSansTC-Regular.ttf</boldItalic>
+
+        <!-- 一般字體 -->
+        <normal>NotoSansTC-Regular.ttf</normal>
+
+        <!--
+             目前只有 Regular 字型檔，
+             所以粗體、斜體暫時共用 Regular。
+        -->
+        <bold>NotoSansTC-Regular.ttf</bold>
+
+        <italic>NotoSansTC-Regular.ttf</italic>
+
+        <boldItalic>NotoSansTC-Regular.ttf</boldItalic>
+
+        <!--
+             Identity-H：
+             PDF 中文 Unicode 編碼
+        -->
         <pdfEncoding>Identity-H</pdfEncoding>
+
+        <!--
+             true：
+             將字型嵌入 PDF，
+             避免換電腦後中文字變成空白或亂碼
+        -->
         <pdfEmbedded>true</pdfEmbedded>
+
     </fontFamily>
+
 </fontFamilies>
