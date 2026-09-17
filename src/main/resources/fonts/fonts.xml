@@ -3,33 +3,65 @@
 <fontFamilies>
 
     <!-- ==========================================
-         MyPC 商城中文字型
+         MyPC 商城 JasperReports 中文字型設定
          ========================================== -->
+
     <fontFamily name="MyChineseFont">
 
-        <!-- 一般字體 -->
-        <normal>NotoSansTC-Regular.ttf</normal>
-
         <!--
-             目前只有 Regular 字型檔，
-             所以粗體、斜體暫時共用 Regular。
+            字型原始位置：
+
+            src/main/resources/fonts/
+            NotoSansTC-Regular.ttf
+
+            Maven / Jenkins 編譯後位置：
+
+            target/classes/fonts/
+            NotoSansTC-Regular.ttf
+
+            JasperReports 從 classpath 根目錄尋找，
+            所以這裡使用：
+
+            fonts/NotoSansTC-Regular.ttf
+
+            注意：
+            前面不要加 /
         -->
-        <bold>NotoSansTC-Regular.ttf</bold>
 
-        <italic>NotoSansTC-Regular.ttf</italic>
+        <!-- 一般字體 -->
+        <normal>fonts/NotoSansTC-Regular.ttf</normal>
 
-        <boldItalic>NotoSansTC-Regular.ttf</boldItalic>
 
         <!--
-             Identity-H：
-             PDF 中文 Unicode 編碼
+            目前只有 Regular 字型檔，
+            因此 Bold / Italic / BoldItalic
+            暫時全部使用同一個 Regular TTF。
+        -->
+
+        <!-- 粗體 -->
+        <bold>fonts/NotoSansTC-Regular.ttf</bold>
+
+        <!-- 斜體 -->
+        <italic>fonts/NotoSansTC-Regular.ttf</italic>
+
+        <!-- 粗斜體 -->
+        <boldItalic>fonts/NotoSansTC-Regular.ttf</boldItalic>
+
+
+        <!--
+            Identity-H：
+            PDF 使用 Unicode 編碼，
+            適合繁體中文。
         -->
         <pdfEncoding>Identity-H</pdfEncoding>
 
+
         <!--
-             true：
-             將字型嵌入 PDF，
-             避免換電腦後中文字變成空白或亂碼
+            true：
+            將字型嵌入 PDF。
+
+            PDF 換到其他電腦開啟時，
+            不需要該電腦另外安裝這個字型。
         -->
         <pdfEmbedded>true</pdfEmbedded>
 
