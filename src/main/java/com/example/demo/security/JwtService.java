@@ -2,6 +2,8 @@ package com.example.demo.security;
 
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.security.KeyFactory;
 import java.security.PrivateKey;
 import java.security.PublicKey;
@@ -15,8 +17,10 @@ import org.springframework.stereotype.Service;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 
+
 @Service
 public class JwtService {
+
 
     // ==========================================
     // Token 有效時間
@@ -26,9 +30,11 @@ public class JwtService {
     private static final long ACCESS_TOKEN_EXPIRATION =
             15 * 60 * 1000L;
 
+
     // Refresh Token：7 天
     private static final long REFRESH_TOKEN_EXPIRATION =
             7 * 24 * 60 * 60 * 1000L;
+
 
 
     // ==========================================
@@ -40,6 +46,7 @@ public class JwtService {
     private final PublicKey publicKey;
 
 
+
     // ==========================================
     // Constructor
     // ==========================================
@@ -48,11 +55,15 @@ public class JwtService {
 
         try {
 
+            // 載入 Private Key
             this.privateKey =
                     loadPrivateKey();
 
+
+            // 載入 Public Key
             this.publicKey =
                     loadPublicKey();
+
 
         } catch (Exception e) {
 
@@ -64,6 +75,7 @@ public class JwtService {
     }
 
 
+
     // ==========================================
     // 產生 Access Token
     // 短效 Token
@@ -72,8 +84,10 @@ public class JwtService {
     public String generateAccessToken(
             String email) {
 
+
         Date now =
                 new Date();
+
 
         Date expiration =
                 new Date(
@@ -87,7 +101,7 @@ public class JwtService {
                 // JWT Subject
                 .subject(email)
 
-                // ★ Token 類型
+                // Token 類型
                 .claim(
                         "type",
                         "access"
@@ -99,7 +113,7 @@ public class JwtService {
                 // 過期時間
                 .expiration(expiration)
 
-                // ★ RS256 私鑰簽章
+                // RS256 私鑰簽章
                 .signWith(
                         privateKey,
                         Jwts.SIG.RS256
@@ -107,6 +121,7 @@ public class JwtService {
 
                 .compact();
     }
+
 
 
     // ==========================================
@@ -117,8 +132,10 @@ public class JwtService {
     public String generateRefreshToken(
             String email) {
 
+
         Date now =
                 new Date();
+
 
         Date expiration =
                 new Date(
@@ -131,17 +148,19 @@ public class JwtService {
 
                 .subject(email)
 
-                // ★ Token 類型
+                // Token 類型
                 .claim(
                         "type",
                         "refresh"
                 )
 
+                // 發行時間
                 .issuedAt(now)
 
+                // 過期時間
                 .expiration(expiration)
 
-                // ★ 一樣使用 Private Key 簽章
+                // Private Key 簽章
                 .signWith(
                         privateKey,
                         Jwts.SIG.RS256
@@ -151,6 +170,7 @@ public class JwtService {
     }
 
 
+
     // ==========================================
     // 從 JWT 取得 Email
     // ==========================================
@@ -158,14 +178,17 @@ public class JwtService {
     public String extractEmail(
             String token) {
 
+
         Claims claims =
                 extractAllClaims(
                         token
                 );
 
+
         return claims
                 .getSubject();
     }
+
 
 
     // ==========================================
@@ -178,16 +201,19 @@ public class JwtService {
     public String extractTokenType(
             String token) {
 
+
         Claims claims =
                 extractAllClaims(
                         token
                 );
+
 
         return claims.get(
                 "type",
                 String.class
         );
     }
+
 
 
     // ==========================================
@@ -197,14 +223,17 @@ public class JwtService {
     public Date extractExpiration(
             String token) {
 
+
         Claims claims =
                 extractAllClaims(
                         token
                 );
 
+
         return claims
                 .getExpiration();
     }
+
 
 
     // ==========================================
@@ -214,7 +243,9 @@ public class JwtService {
     public boolean isAccessTokenValid(
             String token) {
 
+
         try {
+
 
             Claims claims =
                     extractAllClaims(
@@ -231,7 +262,7 @@ public class JwtService {
 
             Date expiration =
                     claims
-                        .getExpiration();
+                            .getExpiration();
 
 
             // 必須同時符合：
@@ -240,27 +271,32 @@ public class JwtService {
             // 2. 尚未過期
 
             return "access".equals(type)
+
                     &&
+
                     expiration != null
+
                     &&
+
                     expiration.after(
                             new Date()
                     );
 
+
         } catch (Exception e) {
 
-            // 包含：
-            //
+
             // Token 過期
             // Signature 錯誤
             // Token 格式錯誤
             // Public Key 驗證失敗
             //
-            // 都視為無效
+            // 全部視為無效
 
             return false;
         }
     }
+
 
 
     // ==========================================
@@ -270,7 +306,9 @@ public class JwtService {
     public boolean isRefreshTokenValid(
             String token) {
 
+
         try {
+
 
             Claims claims =
                     extractAllClaims(
@@ -287,7 +325,7 @@ public class JwtService {
 
             Date expiration =
                     claims
-                        .getExpiration();
+                            .getExpiration();
 
 
             // 必須：
@@ -296,18 +334,25 @@ public class JwtService {
             // 而且還沒過期
 
             return "refresh".equals(type)
+
                     &&
+
                     expiration != null
+
                     &&
+
                     expiration.after(
                             new Date()
                     );
 
+
         } catch (Exception e) {
+
 
             return false;
         }
     }
+
 
 
     // ==========================================
@@ -323,10 +368,12 @@ public class JwtService {
     public boolean validateToken(
             String token) {
 
+
         return isAccessTokenValid(
                 token
         );
     }
+
 
 
     // ==========================================
@@ -342,25 +389,28 @@ public class JwtService {
     public String generateToken(
             String email) {
 
+
         return generateAccessToken(
                 email
         );
     }
 
 
+
     // ==========================================
     // JWT 核心解析
     //
-    // ★ Public Key 在這裡驗證 Signature
+    // Public Key 在這裡驗證 Signature
     // ==========================================
 
     private Claims extractAllClaims(
             String token) {
 
+
         return Jwts
                 .parser()
 
-                // ★ 公鑰驗證 JWT Signature
+                // 公鑰驗證 JWT Signature
                 .verifyWith(
                         publicKey
                 )
@@ -375,39 +425,115 @@ public class JwtService {
     }
 
 
+
     // ==========================================
     // 載入 Private Key
+    //
+    // ★ 這裡是 Jenkins 版本的主要修改
     // ==========================================
 
     private PrivateKey loadPrivateKey()
             throws Exception {
 
-        String key =
-                readKeyFile(
-                        "/keys/private_key.pem"
+
+        String key;
+
+
+        // ==========================================
+        // 先檢查 Jenkins 是否提供 Secret File
+        // ==========================================
+
+        String privateKeyFile =
+                System.getenv(
+                        "JWT_PRIVATE_KEY_FILE"
                 );
 
 
+        if (privateKeyFile != null
+                && !privateKeyFile.isBlank()) {
+
+
+            // ==========================================
+            // Jenkins 執行
+            //
+            // JWT_PRIVATE_KEY_FILE
+            // 會是 Jenkins 建立的暫存檔案路徑
+            // ==========================================
+
+            System.out.println(
+                    "JWT Private Key：使用 Jenkins Secret File"
+            );
+
+
+            key =
+                    Files.readString(
+                            Path.of(
+                                    privateKeyFile
+                            ),
+                            StandardCharsets.UTF_8
+                    );
+
+
+        } else {
+
+
+            // ==========================================
+            // Eclipse / 本機執行
+            //
+            // 沒有 Jenkins 環境變數時
+            // 使用 resources 裡面的 private_key.pem
+            // ==========================================
+
+            System.out.println(
+                    "JWT Private Key：使用 classpath"
+            );
+
+
+            key =
+                    readKeyFile(
+                            "/keys/private_key.pem"
+                    );
+        }
+
+
+
+        // ==========================================
+        // 移除 PEM Header / Footer
+        // ==========================================
+
         key = key
+
                 .replace(
                         "-----BEGIN PRIVATE KEY-----",
                         ""
                 )
+
                 .replace(
                         "-----END PRIVATE KEY-----",
                         ""
                 )
+
                 .replaceAll(
                         "\\s",
                         ""
                 );
 
 
+
+        // ==========================================
+        // Base64 Decode
+        // ==========================================
+
         byte[] decoded =
                 Base64
-                    .getDecoder()
-                    .decode(key);
+                        .getDecoder()
+                        .decode(key);
 
+
+
+        // ==========================================
+        // 建立 PKCS8 Key Spec
+        // ==========================================
 
         PKCS8EncodedKeySpec keySpec =
                 new PKCS8EncodedKeySpec(
@@ -415,12 +541,22 @@ public class JwtService {
                 );
 
 
+
+        // ==========================================
+        // RSA KeyFactory
+        // ==========================================
+
         KeyFactory keyFactory =
                 KeyFactory
-                    .getInstance(
-                        "RSA"
-                    );
+                        .getInstance(
+                                "RSA"
+                        );
 
+
+
+        // ==========================================
+        // 產生 PrivateKey
+        // ==========================================
 
         return keyFactory
                 .generatePrivate(
@@ -429,12 +565,17 @@ public class JwtService {
     }
 
 
+
     // ==========================================
     // 載入 Public Key
+    //
+    // Public Key 不是機密
+    // 可以繼續從 resources 讀取
     // ==========================================
 
     private PublicKey loadPublicKey()
             throws Exception {
+
 
         String key =
                 readKeyFile(
@@ -442,26 +583,44 @@ public class JwtService {
                 );
 
 
+
+        // ==========================================
+        // 移除 PEM Header / Footer
+        // ==========================================
+
         key = key
+
                 .replace(
                         "-----BEGIN PUBLIC KEY-----",
                         ""
                 )
+
                 .replace(
                         "-----END PUBLIC KEY-----",
                         ""
                 )
+
                 .replaceAll(
                         "\\s",
                         ""
                 );
 
 
+
+        // ==========================================
+        // Base64 Decode
+        // ==========================================
+
         byte[] decoded =
                 Base64
-                    .getDecoder()
-                    .decode(key);
+                        .getDecoder()
+                        .decode(key);
 
+
+
+        // ==========================================
+        // 建立 X509 Key Spec
+        // ==========================================
 
         X509EncodedKeySpec keySpec =
                 new X509EncodedKeySpec(
@@ -469,12 +628,22 @@ public class JwtService {
                 );
 
 
+
+        // ==========================================
+        // RSA KeyFactory
+        // ==========================================
+
         KeyFactory keyFactory =
                 KeyFactory
-                    .getInstance(
-                        "RSA"
-                    );
+                        .getInstance(
+                                "RSA"
+                        );
 
+
+
+        // ==========================================
+        // 產生 PublicKey
+        // ==========================================
 
         return keyFactory
                 .generatePublic(
@@ -483,29 +652,40 @@ public class JwtService {
     }
 
 
+
     // ==========================================
     // 從 resources 讀取 Key
+    //
+    // Eclipse 本機 Private Key
+    // Public Key
+    // 都可以使用這個方法
     // ==========================================
 
     private String readKeyFile(
             String path)
             throws Exception {
 
+
         try (
-            InputStream inputStream =
-                    getClass()
-                        .getResourceAsStream(
-                            path
-                        )
+
+                InputStream inputStream =
+                        getClass()
+                                .getResourceAsStream(
+                                        path
+                                )
+
         ) {
 
+
             if (inputStream == null) {
+
 
                 throw new IllegalArgumentException(
                         "找不到 JWT Key："
                         + path
                 );
             }
+
 
 
             return new String(
