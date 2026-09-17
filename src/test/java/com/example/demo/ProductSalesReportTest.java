@@ -57,6 +57,7 @@ public class ProductSalesReportTest {
         );
 
         System.out.println("JRXML 讀取成功");
+        
 
 
         /*
@@ -72,6 +73,34 @@ public class ProductSalesReportTest {
                     );
 
             System.out.println("JRXML 編譯成功");
+            
+            System.out.println("========================================");
+            System.out.println("檢查 JasperReports Font Extension");
+            System.out.println("========================================");
+
+            System.out.println(
+                    "jasperreports_extension.properties = "
+                    + getClass().getResource(
+                            "/jasperreports_extension.properties"
+                    )
+            );
+
+            System.out.println(
+                    "fonts.xml = "
+                    + getClass().getResource(
+                            "/fonts/fonts.xml"
+                    )
+            );
+
+            System.out.println(
+                    "NotoSansTC-Regular.ttf = "
+                    + getClass().getResource(
+                            "/fonts/NotoSansTC-Regular.ttf"
+                    )
+            );     
+            
+            
+            
 
         } catch (Exception e) {
 
