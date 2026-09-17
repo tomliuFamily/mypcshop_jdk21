@@ -1,0 +1,641 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<jasperReport
+    name="ProductSalesReport"
+    language="java"
+    pageWidth="842"
+    pageHeight="595"
+    orientation="Landscape"
+    columnWidth="802"
+    leftMargin="20"
+    rightMargin="20"
+    topMargin="20"
+    bottomMargin="20">
+
+
+    <!-- =====================================================
+         SQL 查詢
+         ===================================================== -->
+
+    <query language="sql">
+        <![CDATA[
+            SELECT
+                id,
+                name,
+                category,
+                price,
+                stock,
+                sales_count,
+                price * sales_count AS sales_amount
+            FROM products
+            ORDER BY sales_count DESC, id ASC
+        ]]>
+    </query>
+
+
+    <!-- =====================================================
+         Fields
+         ===================================================== -->
+
+    <field name="id" class="java.lang.Integer"/>
+
+    <field name="name" class="java.lang.String"/>
+
+    <field name="category" class="java.lang.String"/>
+
+    <field name="price" class="java.lang.Double"/>
+
+    <field name="stock" class="java.lang.Integer"/>
+
+    <field name="sales_count" class="java.lang.Integer"/>
+
+    <field name="sales_amount" class="java.lang.Double"/>
+
+
+    <!-- =====================================================
+         Variables
+         ===================================================== -->
+
+    <!-- 總銷售數量 -->
+    <variable
+        name="TOTAL_SALES_COUNT"
+        class="java.lang.Long"
+        calculation="Sum">
+
+        <expression>
+            <![CDATA[
+                $F{sales_count} == null
+                ? 0L
+                : $F{sales_count}.longValue()
+            ]]>
+        </expression>
+
+    </variable>
+
+
+    <!-- 總銷售金額 -->
+    <variable
+        name="TOTAL_SALES_AMOUNT"
+        class="java.lang.Double"
+        calculation="Sum">
+
+        <expression>
+            <![CDATA[
+                $F{sales_amount} == null
+                ? 0.0
+                : $F{sales_amount}
+            ]]>
+        </expression>
+
+    </variable>
+
+
+    <!-- =====================================================
+         Title
+         ===================================================== -->
+
+    <title height="75">
+
+        <!-- 主標題 -->
+        <element
+            kind="staticText"
+            x="0"
+            y="5"
+            width="802"
+            height="36"
+            fontName="MyChineseFont"
+            fontSize="22"
+            bold="true"
+            hTextAlign="Center"
+            vTextAlign="Middle">
+
+            <text>MyPC 商城產品銷售報表</text>
+
+        </element>
+
+
+        <!-- 報表產生時間 -->
+        <element
+            kind="textField"
+            x="480"
+            y="45"
+            width="322"
+            height="20"
+            fontName="MyChineseFont"
+            fontSize="10"
+            hTextAlign="Right"
+            vTextAlign="Middle">
+
+            <expression>
+                <![CDATA[
+                    "報表產生時間："
+                    + new java.text.SimpleDateFormat(
+                        "yyyy-MM-dd HH:mm:ss"
+                    ).format(new java.util.Date())
+                ]]>
+            </expression>
+
+        </element>
+
+    </title>
+
+
+    <!-- =====================================================
+         Column Header
+         ===================================================== -->
+
+    <columnHeader height="40">
+
+
+        <!-- 編號 -->
+        <element
+            kind="staticText"
+            x="0"
+            y="0"
+            width="60"
+            height="40"
+            mode="Opaque"
+            backcolor="#5B4CF0"
+            forecolor="#FFFFFF"
+            fontName="MyChineseFont"
+            fontSize="11"
+            bold="true"
+            hTextAlign="Center"
+            vTextAlign="Middle">
+
+            <text>編號</text>
+
+        </element>
+
+
+        <!-- 產品名稱 -->
+        <element
+            kind="staticText"
+            x="60"
+            y="0"
+            width="180"
+            height="40"
+            mode="Opaque"
+            backcolor="#5B4CF0"
+            forecolor="#FFFFFF"
+            fontName="MyChineseFont"
+            fontSize="11"
+            bold="true"
+            hTextAlign="Center"
+            vTextAlign="Middle">
+
+            <text>產品名稱</text>
+
+        </element>
+
+
+        <!-- 分類 -->
+        <element
+            kind="staticText"
+            x="240"
+            y="0"
+            width="100"
+            height="40"
+            mode="Opaque"
+            backcolor="#5B4CF0"
+            forecolor="#FFFFFF"
+            fontName="MyChineseFont"
+            fontSize="11"
+            bold="true"
+            hTextAlign="Center"
+            vTextAlign="Middle">
+
+            <text>分類</text>
+
+        </element>
+
+
+        <!-- 單價 -->
+        <element
+            kind="staticText"
+            x="340"
+            y="0"
+            width="100"
+            height="40"
+            mode="Opaque"
+            backcolor="#5B4CF0"
+            forecolor="#FFFFFF"
+            fontName="MyChineseFont"
+            fontSize="11"
+            bold="true"
+            hTextAlign="Center"
+            vTextAlign="Middle">
+
+            <text>單價</text>
+
+        </element>
+
+
+        <!-- 庫存 -->
+        <element
+            kind="staticText"
+            x="440"
+            y="0"
+            width="90"
+            height="40"
+            mode="Opaque"
+            backcolor="#5B4CF0"
+            forecolor="#FFFFFF"
+            fontName="MyChineseFont"
+            fontSize="11"
+            bold="true"
+            hTextAlign="Center"
+            vTextAlign="Middle">
+
+            <text>庫存</text>
+
+        </element>
+
+
+        <!-- 累計銷售 -->
+        <element
+            kind="staticText"
+            x="530"
+            y="0"
+            width="120"
+            height="40"
+            mode="Opaque"
+            backcolor="#5B4CF0"
+            forecolor="#FFFFFF"
+            fontName="MyChineseFont"
+            fontSize="11"
+            bold="true"
+            hTextAlign="Center"
+            vTextAlign="Middle">
+
+            <text>累計銷售</text>
+
+        </element>
+
+
+        <!-- 銷售金額 -->
+        <element
+            kind="staticText"
+            x="650"
+            y="0"
+            width="152"
+            height="40"
+            mode="Opaque"
+            backcolor="#5B4CF0"
+            forecolor="#FFFFFF"
+            fontName="MyChineseFont"
+            fontSize="11"
+            bold="true"
+            hTextAlign="Center"
+            vTextAlign="Middle">
+
+            <text>銷售金額</text>
+
+        </element>
+
+    </columnHeader>
+
+
+    <!-- =====================================================
+         Detail
+         ===================================================== -->
+
+    <detail>
+
+        <band height="36">
+
+
+            <!-- 編號 -->
+            <element
+                kind="textField"
+                x="0"
+                y="0"
+                width="60"
+                height="36"
+                fontName="MyChineseFont"
+                fontSize="10"
+                hTextAlign="Center"
+                vTextAlign="Middle">
+
+                <expression>
+                    <![CDATA[
+                        $F{id}
+                    ]]>
+                </expression>
+
+                <box>
+                    <pen
+                        lineWidth="0.5"
+                        lineColor="#D1D5DB"/>
+                </box>
+
+            </element>
+
+
+            <!-- 產品名稱 -->
+            <element
+                kind="textField"
+                x="60"
+                y="0"
+                width="180"
+                height="36"
+                fontName="MyChineseFont"
+                fontSize="10"
+                vTextAlign="Middle">
+
+                <expression>
+                    <![CDATA[
+                        $F{name}
+                    ]]>
+                </expression>
+
+                <box leftPadding="8">
+                    <pen
+                        lineWidth="0.5"
+                        lineColor="#D1D5DB"/>
+                </box>
+
+            </element>
+
+
+            <!-- 分類 -->
+            <element
+                kind="textField"
+                x="240"
+                y="0"
+                width="100"
+                height="36"
+                fontName="MyChineseFont"
+                fontSize="10"
+                hTextAlign="Center"
+                vTextAlign="Middle">
+
+                <expression>
+                    <![CDATA[
+                        $F{category}
+                    ]]>
+                </expression>
+
+                <box>
+                    <pen
+                        lineWidth="0.5"
+                        lineColor="#D1D5DB"/>
+                </box>
+
+            </element>
+
+
+            <!-- 單價 -->
+            <element
+                kind="textField"
+                x="340"
+                y="0"
+                width="100"
+                height="36"
+                fontName="MyChineseFont"
+                fontSize="10"
+                pattern="#,##0"
+                hTextAlign="Right"
+                vTextAlign="Middle">
+
+                <expression>
+                    <![CDATA[
+                        $F{price}
+                    ]]>
+                </expression>
+
+                <box rightPadding="8">
+                    <pen
+                        lineWidth="0.5"
+                        lineColor="#D1D5DB"/>
+                </box>
+
+            </element>
+
+
+            <!-- 庫存 -->
+            <element
+                kind="textField"
+                x="440"
+                y="0"
+                width="90"
+                height="36"
+                fontName="MyChineseFont"
+                fontSize="10"
+                pattern="#,##0"
+                hTextAlign="Center"
+                vTextAlign="Middle">
+
+                <expression>
+                    <![CDATA[
+                        $F{stock}
+                    ]]>
+                </expression>
+
+                <box>
+                    <pen
+                        lineWidth="0.5"
+                        lineColor="#D1D5DB"/>
+                </box>
+
+            </element>
+
+
+            <!-- 累計銷售 -->
+            <element
+                kind="textField"
+                x="530"
+                y="0"
+                width="120"
+                height="36"
+                fontName="MyChineseFont"
+                fontSize="10"
+                pattern="#,##0"
+                hTextAlign="Right"
+                vTextAlign="Middle">
+
+                <expression>
+                    <![CDATA[
+                        $F{sales_count}
+                    ]]>
+                </expression>
+
+                <box rightPadding="8">
+                    <pen
+                        lineWidth="0.5"
+                        lineColor="#D1D5DB"/>
+                </box>
+
+            </element>
+
+
+            <!-- 銷售金額 -->
+            <element
+                kind="textField"
+                x="650"
+                y="0"
+                width="152"
+                height="36"
+                fontName="MyChineseFont"
+                fontSize="10"
+                pattern="#,##0"
+                hTextAlign="Right"
+                vTextAlign="Middle">
+
+                <expression>
+                    <![CDATA[
+                        $F{sales_amount}
+                    ]]>
+                </expression>
+
+                <box rightPadding="8">
+                    <pen
+                        lineWidth="0.5"
+                        lineColor="#D1D5DB"/>
+                </box>
+
+            </element>
+
+        </band>
+
+    </detail>
+
+
+    <!-- =====================================================
+         Summary
+         ===================================================== -->
+
+    <summary height="100">
+
+
+        <!-- 分隔線 -->
+        <element
+            kind="line"
+            x="0"
+            y="8"
+            width="802"
+            height="1">
+
+            <pen
+                lineWidth="1.0"
+                lineColor="#CBD5E1"/>
+
+        </element>
+
+
+        <!-- 總銷售數量文字 -->
+        <element
+            kind="staticText"
+            x="400"
+            y="20"
+            width="180"
+            height="28"
+            fontName="MyChineseFont"
+            fontSize="12"
+            bold="true"
+            hTextAlign="Right"
+            vTextAlign="Middle">
+
+            <text>總銷售數量：</text>
+
+        </element>
+
+
+        <!-- 總銷售數量 -->
+        <element
+            kind="textField"
+            x="580"
+            y="20"
+            width="222"
+            height="28"
+            fontName="MyChineseFont"
+            fontSize="12"
+            bold="true"
+            pattern="#,##0"
+            hTextAlign="Right"
+            vTextAlign="Middle">
+
+            <expression>
+                <![CDATA[
+                    $V{TOTAL_SALES_COUNT}
+                ]]>
+            </expression>
+
+        </element>
+
+
+        <!-- 總銷售金額文字 -->
+        <element
+            kind="staticText"
+            x="400"
+            y="55"
+            width="180"
+            height="30"
+            fontName="MyChineseFont"
+            fontSize="12"
+            bold="true"
+            hTextAlign="Right"
+            vTextAlign="Middle">
+
+            <text>總銷售金額：</text>
+
+        </element>
+
+
+        <!-- 總銷售金額 -->
+        <element
+            kind="textField"
+            x="580"
+            y="55"
+            width="222"
+            height="30"
+            fontName="MyChineseFont"
+            fontSize="14"
+            bold="true"
+            forecolor="#EA580C"
+            pattern="#,##0"
+            hTextAlign="Right"
+            vTextAlign="Middle">
+
+            <expression>
+                <![CDATA[
+                    $V{TOTAL_SALES_AMOUNT}
+                ]]>
+            </expression>
+
+        </element>
+
+    </summary>
+
+
+    <!-- =====================================================
+         Page Footer
+         ===================================================== -->
+
+    <pageFooter height="25">
+
+        <element
+            kind="textField"
+            x="0"
+            y="3"
+            width="802"
+            height="20"
+            fontName="MyChineseFont"
+            fontSize="9"
+            forecolor="#64748B"
+            hTextAlign="Center"
+            vTextAlign="Middle">
+
+            <expression>
+                <![CDATA[
+                    "MyPC 商城產品銷售報表　　頁次："
+                    + $V{PAGE_NUMBER}
+                ]]>
+            </expression>
+
+        </element>
+
+    </pageFooter>
+
+
+</jasperReport>

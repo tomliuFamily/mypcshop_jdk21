@@ -1,0 +1,110 @@
+services:
+
+  # ==========================================================
+  # MySQL 資料庫
+  # ==========================================================
+  mysql:
+    image: mysql:8.4
+    container_name: mypcshop-mysql
+    restart: unless-stopped
+
+    environment:
+      # Docker MySQL 的 root 密碼
+      MYSQL_ROOT_PASSWORD: "8888"
+
+      # 第一次啟動時自動建立的資料庫
+      MYSQL_DATABASE: mypcdb
+
+      # 提供 Spring Boot 使用的帳號
+      MYSQL_USER: mypcuser
+
+      # mypcuser 的密碼
+      MYSQL_PASSWORD: "8888"
+
+      # MySQL 時區
+      TZ: Asia/Taipei
+
+    ports:
+      # Windows 使用 localhost:3307
+      # 容器內部使用 3306
+      - "3307:3306"
+
+    volumes:
+      # 永久保存 MySQL 資料
+      - mypcdb-data:/var/lib/mysql
+
+      # 第一次建立資料庫時，自動執行 SQL
+      - ./mysql-init:/docker-entrypoint-initdb.d
+
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "mysqladmin ping -h localhost -u root -p8888 --silent"
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+    networks:
+      - mypcshop-network
+
+
+  # ==========================================================
+  # Spring Boot 後端
+  # ==========================================================
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+
+    image: mypcshop-jdk21-app
+    container_name: mypcshop-app
+    restart: unless-stopped
+
+    ports:
+      # Windows localhost:8080 對應容器 8080
+      - "8080:8080"
+
+    environment:
+      # Spring Boot 容器使用 mysql 服務名稱連線
+      SPRING_DATASOURCE_URL: "jdbc:mysql://mysql:3306/mypcdb?useSSL=false&serverTimezone=Asia/Taipei&characterEncoding=UTF-8&allowPublicKeyRetrieval=true"
+
+      # 必須和 MYSQL_USER 相同
+      SPRING_DATASOURCE_USERNAME: mypcuser
+
+      # 必須和 MYSQL_PASSWORD 相同
+      SPRING_DATASOURCE_PASSWORD: "8888"
+
+      # Java／容器時區
+      TZ: Asia/Taipei
+
+    depends_on:
+      mysql:
+        condition: service_healthy
+
+    networks:
+      - mypcshop-network
+
+
+# ============================================================
+# Docker Volume
+# ============================================================
+volumes:
+
+  # 保存 MySQL 資料
+  # 即使停止或重新建立容器，資料仍然保留
+  mypcdb-data:
+    name: mypcdb-data
+
+
+# ============================================================
+# Docker Network
+# ============================================================
+networks:
+
+  # Spring Boot 和 MySQL 共用的內部網路
+  mypcshop-network:
+    name: mypcshop-network
+    driver: bridge

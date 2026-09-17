@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<!DOCTYPE mapper
+        PUBLIC
+        "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+
+<mapper namespace="com.example.demo.mapper.ProductMapper">
+
+
+    <!-- =================================================
+         Product ResultMap
+
+         MySQL：
+         sales_count
+
+         Java：
+         salesCount
+         ================================================= -->
+
+    <resultMap
+        id="ProductResultMap"
+        type="com.example.demo.entity.Product">
+
+        <id
+            property="id"
+            column="id"/>
+
+        <result
+            property="name"
+            column="name"/>
+
+        <result
+            property="price"
+            column="price"/>
+
+        <result
+            property="category"
+            column="category"/>
+
+        <result
+            property="description"
+            column="description"/>
+
+        <result
+            property="image"
+            column="image"/>
+
+        <result
+            property="stock"
+            column="stock"/>
+
+        <result
+            property="salesCount"
+            column="sales_count"/>
+
+    </resultMap>
+
+
+    <!-- =================================================
+         商品搜尋
+
+         支援：
+
+         1. keyword
+         2. minPrice
+         3. maxPrice
+         4. 三個條件一起使用
+         ================================================= -->
+
+    <select
+        id="searchProducts"
+        resultMap="ProductResultMap">
+
+        SELECT
+            id,
+            name,
+            price,
+            category,
+            description,
+            image,
+            stock,
+            sales_count
+
+        FROM products
+
+
+        <where>
+
+
+            <!-- =========================================
+                 商品名稱 / 類別 / 說明
+                 ========================================= -->
+
+            <if test="
+                keyword != null
+                and keyword != ''
+            ">
+
+                AND
+                (
+                    name LIKE CONCAT(
+                        '%',
+                        #{keyword},
+                        '%'
+                    )
+
+                    OR
+
+                    category LIKE CONCAT(
+                        '%',
+                        #{keyword},
+                        '%'
+                    )
+
+                    OR
+
+                    description LIKE CONCAT(
+                        '%',
+                        #{keyword},
+                        '%'
+                    )
+                )
+
+            </if>
+
+
+            <!-- =========================================
+                 最低價格
+                 ========================================= -->
+
+            <if test="
+                minPrice != null
+            ">
+
+                AND price &gt;= #{minPrice}
+
+            </if>
+
+
+            <!-- =========================================
+                 最高價格
+                 ========================================= -->
+
+            <if test="
+                maxPrice != null
+            ">
+
+                AND price &lt;= #{maxPrice}
+
+            </if>
+
+
+        </where>
+
+
+        ORDER BY
+            price ASC,
+            id ASC
+
+
+    </select>
+
+
+</mapper>
