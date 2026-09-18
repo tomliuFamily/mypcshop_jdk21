@@ -8,6 +8,6 @@ public class DeployTestController {
 
     @GetMapping("/api/deploy-test")
     public String deployTest() {
-        return "Jenkins CI/CD Version 1";
+        return "Jenkins CI/CD Version 2";
     }
 }
