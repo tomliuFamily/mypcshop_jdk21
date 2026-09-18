@@ -17,10 +17,16 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import com.example.demo.security.JwtAuthenticationFilter;
 
+
 @Configuration
 public class SecurityConfig {
 
+
+    // ==============================================
+    // JWT Filter
+    // ==============================================
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
+
 
     public SecurityConfig(
             JwtAuthenticationFilter jwtAuthenticationFilter) {
@@ -30,14 +36,21 @@ public class SecurityConfig {
     }
 
 
+    // ==============================================
+    // Spring Security 主設定
+    // ==============================================
     @Bean
     public SecurityFilterChain securityFilterChain(
             HttpSecurity http) throws Exception {
 
+
         http
+
 
             // ==========================================
             // CORS
+            // React localhost:5173
+            // 可以呼叫 Spring Boot localhost:8080
             // ==========================================
             .cors(cors ->
                 cors.configurationSource(
@@ -47,7 +60,9 @@ public class SecurityConfig {
 
 
             // ==========================================
-            // REST + JWT
+            // REST API + JWT
+            //
+            // JWT 不使用傳統 CSRF Token
             // ==========================================
             .csrf(csrf ->
                 csrf.disable()
@@ -55,7 +70,10 @@ public class SecurityConfig {
 
 
             // ==========================================
-            // JWT 不使用 Session
+            // Session
+            //
+            // JWT 採 STATELESS
+            // Server 不保存登入 Session
             // ==========================================
             .sessionManagement(session ->
                 session.sessionCreationPolicy(
@@ -65,12 +83,14 @@ public class SecurityConfig {
 
 
             // ==========================================
-            // API 權限
+            // API 權限設定
             // ==========================================
             .authorizeHttpRequests(auth -> auth
 
 
+                // ======================================
                 // React CORS Preflight
+                // ======================================
                 .requestMatchers(
                     HttpMethod.OPTIONS,
                     "/**"
@@ -78,7 +98,11 @@ public class SecurityConfig {
                 .permitAll()
 
 
+                // ======================================
                 // 登入
+                //
+                // 不需要 JWT
+                // ======================================
                 .requestMatchers(
                     HttpMethod.POST,
                     "/api/user/login"
@@ -86,7 +110,11 @@ public class SecurityConfig {
                 .permitAll()
 
 
-                // 註冊
+                // ======================================
+                // 會員註冊
+                //
+                // 不需要 JWT
+                // ======================================
                 .requestMatchers(
                     HttpMethod.POST,
                     "/api/user",
@@ -95,7 +123,11 @@ public class SecurityConfig {
                 .permitAll()
 
 
+                // ======================================
                 // Refresh Token
+                //
+                // Access Token 過期時使用
+                // ======================================
                 .requestMatchers(
                     HttpMethod.POST,
                     "/api/user/refresh"
@@ -103,7 +135,11 @@ public class SecurityConfig {
                 .permitAll()
 
 
+                // ======================================
                 // 商品公開查詢
+                //
+                // 不需要登入
+                // ======================================
                 .requestMatchers(
                     HttpMethod.GET,
                     "/api/products/**"
@@ -111,7 +147,32 @@ public class SecurityConfig {
                 .permitAll()
 
 
+                // ======================================
+                // Jenkins CI/CD 部署測試
+                //
+                // 不需要登入
+                //
+                // 用來確認：
+                // GitHub
+                //   ↓
+                // Jenkins
+                //   ↓
+                // Maven Package
+                //   ↓
+                // Deploy
+                //   ↓
+                // Spring Boot 新版本
+                // ======================================
+                .requestMatchers(
+                    HttpMethod.GET,
+                    "/api/deploy-test"
+                )
+                .permitAll()
+
+
+                // ======================================
                 // 商品圖片 / 檔案公開查詢
+                // ======================================
                 .requestMatchers(
                     HttpMethod.GET,
                     "/api/product-files/**"
@@ -119,7 +180,9 @@ public class SecurityConfig {
                 .permitAll()
 
 
+                // ======================================
                 // 留言公開查詢
+                // ======================================
                 .requestMatchers(
                     HttpMethod.GET,
                     "/api/messages/**"
@@ -127,7 +190,9 @@ public class SecurityConfig {
                 .permitAll()
 
 
+                // ======================================
                 // 首頁累計人數公開查詢
+                // ======================================
                 .requestMatchers(
                     HttpMethod.GET,
                     "/api/stats/visits"
@@ -135,7 +200,9 @@ public class SecurityConfig {
                 .permitAll()
 
 
+                // ======================================
                 // WebSocket
+                // ======================================
                 .requestMatchers(
                     "/ws/**"
                 )
@@ -143,9 +210,12 @@ public class SecurityConfig {
 
 
                 // ======================================
-                // ★ 管理員 TXT 會員匯入
+                // 管理員 TXT 會員匯入
                 //
-                // 只有 ROLE_ADMIN 可以使用
+                // Spring Security:
+                // hasRole("ADMIN")
+                //
+                // 實際會檢查 ROLE_ADMIN
                 // ======================================
                 .requestMatchers(
                     HttpMethod.POST,
@@ -155,10 +225,15 @@ public class SecurityConfig {
 
 
                 // ======================================
-                // 其他 API
+                // 其他所有 API
                 //
-                // 訂單、付款、統計 POST...
-                // 都必須登入
+                // 例如：
+                // 訂單
+                // 付款
+                // 統計 POST
+                // 會員相關保護 API
+                //
+                // 全部必須通過 JWT 驗證
                 // ======================================
                 .anyRequest()
                 .authenticated()
@@ -166,7 +241,10 @@ public class SecurityConfig {
 
 
             // ==========================================
-            // JWT Filter
+            // JWT Authentication Filter
+            //
+            // 放在 UsernamePasswordAuthenticationFilter
+            // 前面
             // ==========================================
             .addFilterBefore(
                 jwtAuthenticationFilter,
@@ -179,7 +257,7 @@ public class SecurityConfig {
 
 
     // ==============================================
-    // BCrypt
+    // BCrypt Password Encoder
     // ==============================================
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -189,16 +267,20 @@ public class SecurityConfig {
 
 
     // ==============================================
-    // CORS
+    // CORS Configuration
     // ==============================================
     @Bean
     public CorsConfigurationSource
             corsConfigurationSource() {
 
+
         CorsConfiguration configuration =
                 new CorsConfiguration();
 
 
+        // ==========================================
+        // 允許 React 前端
+        // ==========================================
         configuration.setAllowedOrigins(
             List.of(
                 "http://localhost:5173"
@@ -206,6 +288,9 @@ public class SecurityConfig {
         );
 
 
+        // ==========================================
+        // 允許 HTTP Methods
+        // ==========================================
         configuration.setAllowedMethods(
             List.of(
                 "GET",
@@ -218,6 +303,12 @@ public class SecurityConfig {
         );
 
 
+        // ==========================================
+        // 允許 Request Headers
+        //
+        // Authorization：
+        // Bearer JWT Token
+        // ==========================================
         configuration.setAllowedHeaders(
             List.of(
                 "Authorization",
@@ -227,6 +318,9 @@ public class SecurityConfig {
         );
 
 
+        // ==========================================
+        // 前端可以讀取的 Response Header
+        // ==========================================
         configuration.setExposedHeaders(
             List.of(
                 "Authorization"
@@ -234,9 +328,15 @@ public class SecurityConfig {
         );
 
 
+        // ==========================================
+        // 允許 Credentials
+        // ==========================================
         configuration.setAllowCredentials(true);
 
 
+        // ==========================================
+        // 套用到所有路徑
+        // ==========================================
         UrlBasedCorsConfigurationSource source =
                 new UrlBasedCorsConfigurationSource();
 
