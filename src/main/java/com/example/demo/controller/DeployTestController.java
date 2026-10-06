@@ -8,6 +8,6 @@ public class DeployTestController {
 
     @GetMapping("/api/deploy-test")
     public String deployTest() {
-        return "Jenkins CI/CD Version 自動更新 test successful!  9/30 自動建置-1";
+        return "Jenkins CI/CD Version 自動更新 test successful!  10/06 自動建置-1";
     }
 }
